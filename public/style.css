@@ -1,0 +1,79 @@
+/* IMPORT alata font */
+@import url("https://fonts.googleapis.com/css2?family=Alata&display=swap");
+
+html,
+body {
+  height: 100%;
+  width: 100%;
+}
+
+html {
+  background-color: #68b5e0;
+}
+
+body {
+  max-width: 850px;
+  margin: auto;
+}
+
+/* HEADER : ALL PAGES*/
+.header {
+  border: solid black 1px;
+  margin-top: 5px;
+  background-color: white;
+  display: grid;
+  grid-template-columns: 30% 70%;
+}
+
+/* Logo in the header */
+.header img {
+  max-width: 95%;
+  margin: auto;
+}
+
+/* Div with text in the header */
+.header p {
+  text-align: center;
+  font-size: 100px;
+  margin-top: 5px;
+  margin-bottom: 10px;
+  color: #27366d;
+  font-family: "Alata", "Courier New", Courier, monospace;
+  font-style: normal;
+
+  text-shadow: -5px 2px #0000003f;
+}
+
+/* CONTENT BLOCK : ALL PAGES */
+.content {
+  background-color: white;
+  border: solid black 1px;
+  margin-top: 10px;
+  padding: 5px 5px;
+  min-height: 300px;
+}
+
+/* PAGE INDIC : ALL PAGES */
+.page-indic {
+  background-color: #334454;
+  color: white;
+  text-align: center;
+  font-size: 25px;
+  margin-bottom: 20px;
+}
+
+.page-indic p {
+  margin: 0px 0px;
+  padding: 5px 0px;
+}
+
+/*  : LOGIN PAGE */
+
+.login-form {
+  margin-top: 20px;
+  margin-left: 20px;
+}
+
+.login-form input {
+  margin-bottom: 5px;
+}

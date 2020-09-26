@@ -1,0 +1,27 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Intranet GSB
+{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="style.css">
+{% endblock %}
+
+{% block body %}
+
+    {% include "layouts/pageindic.html.twig" with {'page_indic':'Login'} %}
+
+    <h3>Connectez vous</h3>
+    <form action="{{ path('postlogin') }}" method="post">
+        <div>
+            <input type="text"  placeholder="Login" />
+        </div>
+        <div>
+            <input type="password" placeholder="Password" />
+        </div>
+        <div>
+            <button type="submit">Connexion</button>
+        </div>
+    </form>
+
+{% endblock %}
