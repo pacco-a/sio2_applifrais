@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -51,6 +53,22 @@ class User
      * @ORM\Column(type="string", length=255)
      */
     private $password;
+
+    /**
+     * @ORM\OneToMany(targetEntity=FicheFrais::class, mappedBy="idVisisteur", orphanRemoval=true)
+     */
+    private $ficheFrais;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=Rank::class, inversedBy="users")
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $rank;
+
+    public function __construct()
+    {
+        $this->ficheFrais = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -137,6 +155,49 @@ class User
     public function setPassword(string $password): self
     {
         $this->password = $password;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|FicheFrais[]
+     */
+    public function getFicheFrais(): Collection
+    {
+        return $this->ficheFrais;
+    }
+
+    public function addFicheFrai(FicheFrais $ficheFrai): self
+    {
+        if (!$this->ficheFrais->contains($ficheFrai)) {
+            $this->ficheFrais[] = $ficheFrai;
+            $ficheFrai->setIdVisisteur($this);
+        }
+
+        return $this;
+    }
+
+    public function removeFicheFrai(FicheFrais $ficheFrai): self
+    {
+        if ($this->ficheFrais->contains($ficheFrai)) {
+            $this->ficheFrais->removeElement($ficheFrai);
+            // set the owning side to null (unless already changed)
+            if ($ficheFrai->getIdVisisteur() === $this) {
+                $ficheFrai->setIdVisisteur(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getRank(): ?Rank
+    {
+        return $this->rank;
+    }
+
+    public function setRank(?Rank $rank): self
+    {
+        $this->rank = $rank;
 
         return $this;
     }
