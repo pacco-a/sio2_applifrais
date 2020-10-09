@@ -12,9 +12,13 @@ class SessionService
         $this->session = $session;
     }
 
-    public function loginSession($id)
+    public function connectSession($id)
     {
         $this->session->set("loginId", $id);
+    }
+
+    public function logoutSession() {
+        $this->session->remove("loginId");
     }
 
     public function isLogin(){
