@@ -1,0 +1,19 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Panel VISITEUR
+{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="style.css">
+{% endblock %}
+
+{% block body %}
+
+    {% include "layouts/pageindic.html.twig" with {'page_indic':'Panel : Visiteur'} %}
+
+    CONTENU PANEL VISITEUR
+
+    <a href="{{ path('logout') }}">
+        <button type="button">Test deconnexion</button>
+    </a>
+{% endblock %}

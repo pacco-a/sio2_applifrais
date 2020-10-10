@@ -2,14 +2,17 @@
 namespace App\Service;
 
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use App\Repository\UserRepository;
 
 class SessionService
 {
     private $session;
+    private $userRepository;
 
-    public function __construct(SessionInterface $session)
+    public function __construct(SessionInterface $session, UserRepository $userRepository)
     {
         $this->session = $session;
+        $this->userRepository = $userRepository;
     }
 
     public function connectSession($id)
@@ -27,5 +30,21 @@ class SessionService
         } else {
             return false;
         }
+    }
+
+    public function isRank($rank) {
+
+        $userId = $this->session->get("loginId");
+
+        // SI PAS D'USER : FALSE
+        if(!$userId) {
+            return false;
+        }
+
+        // SI YA USER : le fetcher
+        $userRankId = $this->userRepository->find($userId)->getRank()->getId();
+
+        return $userRankId == $rank;
+
     }
 }

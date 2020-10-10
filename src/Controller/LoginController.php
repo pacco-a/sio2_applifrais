@@ -46,9 +46,24 @@ class LoginController extends AbstractController
         $sessionService->connectSession($user->getId());
 
         // REDIRECTION vers l'index ("/")
+
         $userRank = $user->getRank()->getId();
 
-        dump($userRank);
+        switch ($userRank) {
+            //ADMIN
+            case 1:
+                dump("TODO: admin route");
+                die();
+                break;
+            // COMPTABLE
+            case 2:
+                dump("TODO: comptable route");
+                die();
+                break;
+            // VISITEUR
+            case 3:
+                return $this->redirectToRoute("visiteur");
+        }
 
         die();
         return $this->redirectToRoute("index");
