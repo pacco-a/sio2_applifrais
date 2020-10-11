@@ -17,7 +17,7 @@ class VisiteurController extends AbstractController
         if(!$sessionService->isRank(3)) {
             return $this->redirectToRoute("index");
         }
-        
+
         return $this->render('visiteur/index.html.twig', [
             'controller_name' => 'VisiteurController',
         ]);
