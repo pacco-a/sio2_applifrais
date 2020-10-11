@@ -2,6 +2,8 @@
 
 namespace App\Controller;
 
+use App\Entity\User;
+use App\Form\UserLoginType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use App\Service\SessionService;
@@ -18,8 +20,6 @@ class VisiteurController extends AbstractController
             return $this->redirectToRoute("index");
         }
 
-        return $this->render('visiteur/index.html.twig', [
-            'controller_name' => 'VisiteurController',
-        ]);
+        return $this->render('visiteur/index.html.twig');
     }
 }

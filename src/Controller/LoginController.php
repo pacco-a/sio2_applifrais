@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\User;
+use App\Form\UserLoginType;
 use App\Service\SessionService;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -15,10 +16,17 @@ class LoginController extends AbstractController
     /**
      * @Route("/login", name="loginpage", methods={"GET"})
      */
-    public function getloginpage(LoggerInterface $logger)
+    public function getloginpage(LoggerInterface $logger, Request $request)
     {
+        $user = new User();
+
+        $form = $this->createForm(UserLoginType::class, $user, [
+            "action" => $this->generateUrl("postlogin")
+        ]);
+
         return $this->render('login/index.html.twig', [
-            'controller_name' => 'LoginController',
+            'userLoginForm' => $form->createView(),
+            "err" => $request->query->get("err")
         ]);
     }
 
@@ -27,27 +35,39 @@ class LoginController extends AbstractController
      */
     public function postLogin(Request $request, SessionService $sessionService)
     {
-        $user = $this->getDoctrine()
+        $user = new User();
+
+        $form = $this->createForm(UserLoginType::class, $user);
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $user = $form->getData();
+        } else {
+            $this->redirectToRoute("loginpage");
+        }
+
+        $userObject = $this->getDoctrine()
             ->getRepository(User::class)
-            ->findOneBy(["login" => $request->request->get("login")]);
+            ->findOneBy(["login" => $user->getLogin()]);
 
         // SI aucun utilisateur trouvé, redirection
-        if (!$user) {
-            return $this->redirectToRoute("loginpage");
+        if (!$userObject) {
+            return $this->redirectToRoute("loginpage", ["err" => "nouser"]);
         }
 
         // VERIFICATION mot de passe SINON redirection
-        if ($user->getPassword() != $request->request->get("password")) {
-            return $this->redirectToRoute("loginpage");
+        if ($userObject->getPassword() != $user->getPassword()) {
+            return $this->redirectToRoute("loginpage", ["err" => "wrgpass"]);
         }
 
 
         // AFFECTATION ID dans la SESSION
-        $sessionService->connectSession($user->getId());
+        $sessionService->connectSession($userObject->getId());
 
         // REDIRECTION vers l'index ("/")
 
-        $userRank = $user->getRank()->getId();
+        $userRank = $userObject->getRank()->getId();
 
         switch ($userRank) {
             //ADMIN

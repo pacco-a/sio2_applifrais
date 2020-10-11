@@ -99,9 +99,9 @@ class User
         return $this;
     }
 
-    public function getAdress(): ?string
+    public function getAddress(): ?string
     {
-        return $this->adress;
+        return $this->address;
     }
 
     public function setAdress(string $adress): self
