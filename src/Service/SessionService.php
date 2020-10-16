@@ -24,6 +24,10 @@ class SessionService
         $this->session->remove("loginId");
     }
 
+    public function getId() {
+        return $this->session->get("loginId");
+    }
+
     public function isLogin(){
         if($this->session->get("loginId")) {
             return true;

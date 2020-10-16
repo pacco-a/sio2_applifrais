@@ -16,6 +16,36 @@ body {
   margin: auto;
 }
 
+/* REMOVE DEFAULT*/
+a {
+  color: unset;
+  text-decoration: none; /* no underline */
+}
+
+/* MENU : ALL PAGES*/
+.main-menu {
+  padding: 0px 0px;
+  margin-bottom: 0px;
+}
+
+.main-menu ul {
+  padding: 0px 10px;
+  list-style-type: none;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  margin: 0px 0px;
+}
+
+.main-menu ul li {
+  background-color: #334454;
+  color: white;
+  text-align: center;
+  padding: 10px 5px;
+  cursor: pointer;
+  margin: 0px 3px 0px 0px;
+}
+
 /* HEADER : ALL PAGES*/
 .header {
   border: solid black 1px;

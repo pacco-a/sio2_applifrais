@@ -17,9 +17,20 @@ class UserLoginType extends AbstractType
     {
         $builder
             ->add('login', TextType::class, [
-                "label" => "Username"
+                "label" => false,
+                "attr" => [
+                    "placeholder" => "Nom d'utilisateur",
+                    "autocomplete" => "off"
+                ]
             ])
-            ->add('password', PasswordType::class)
+            ->add('password', PasswordType::class, [
+                "label" => false,
+                "attr" => [
+                    "placeholder" => "Mot de passe",
+                    "autocomplete" => "off",
+                    "class" => "passwordfield"
+                ]
+            ])
             ->add("connexion", SubmitType::class);
         ;
     }

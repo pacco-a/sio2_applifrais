@@ -5,6 +5,7 @@
 
 {% block stylesheets %}
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="login.css">
 {% endblock %}
 
 {% block body %}
@@ -15,6 +16,8 @@
         <p>Pas d'utilisateur à ce nom.</p>
     {% elseif err == "wrgpass" %}
         <p>Mauvais mot de passe.</p>
+    {% elseif err == "accsden" %}
+        <p>Accès refusé, loggez vous.</p>
     {% endif %}
 
     <h3>Connectez vous</h3>

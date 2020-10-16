@@ -2,9 +2,10 @@
 
 namespace App\Controller;
 
+use App\Entity\User;
+use App\Service\SessionService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
-use App\Service\SessionService;
 
 class IndexController extends AbstractController
 {
@@ -13,12 +14,24 @@ class IndexController extends AbstractController
      */
     public function index(SessionService $sessionService)
     {
-        if(!$sessionService->isLogin()) {
-            return $this->redirectToRoute("loginpage");
+        // ROUTE POUR USERS LOGGES
+        if (!$sessionService->isLogin()) {
+            return $this->redirectToRoute("loginpage", [
+                "err" => "accsden",
+            ]);
         }
 
+        // USER RANK POUR LE MENU
+        $userRank = $this->getDoctrine()
+            ->getRepository(User::class)
+            ->find($sessionService->getId())
+            ->getRank()
+            ->getId();
+
+
         return $this->render('index/index.html.twig', [
-            'controller_name' => 'IndexController',
+            "isLogin" => $sessionService->isLogin(),
+            "userRank" => $userRank
         ]);
     }
 }

@@ -2,30 +2,34 @@
 
 namespace App\Controller;
 
-use App\Entity\User;
-use App\Form\UserLoginType;
 use App\Repository\UserRepository;
+use App\Service\SessionService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
-use App\Service\SessionService;
 
-class VisiteurController extends AbstractController
+class FicheController extends AbstractController
 {
     /**
-     * @Route("/visiteur", name="visiteur")
+     * @Route("/fiche", name="fiche")
      */
     public function index(SessionService $sessionService, UserRepository $userRepository)
     {
-        //TEST IF RANK (3) "VISITEUR" ELSE redirect "/"
+        // TODO faire fiche
+
+        //ROUTE UNIQUEMENT POUR VISITEURS
         if(!$sessionService->isRank(3)) {
             return $this->redirectToRoute("index");
         }
 
-        // USER RANK POUR LE MENU
-        $userRank = $userRepository->find($sessionService->getId())
-            ->getRank()->getId();
+        // USER RANK POUR LE MENU **SI** L'USER EST CONNECTE
+        if ($sessionService->isLogin()) {
+            $userRank = $userRepository->find($sessionService->getId())
+                ->getRank()->getId();
+        } else {
+            $userRank = 0;
+        }
 
-        return $this->render('visiteur/index.html.twig', [
+        return $this->render('fiche/index.html.twig', [
             "isLogin" => $sessionService->isLogin(),
             "userRank" => $userRank
         ]);

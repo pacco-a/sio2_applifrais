@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\User;
+use App\Repository\UserRepository;
 use App\Form\UserLoginType;
 use App\Service\SessionService;
 use Psr\Log\LoggerInterface;
@@ -16,7 +17,7 @@ class LoginController extends AbstractController
     /**
      * @Route("/login", name="loginpage", methods={"GET"})
      */
-    public function getloginpage(LoggerInterface $logger, Request $request)
+    public function getloginpage(SessionService $sessionService, LoggerInterface $logger, Request $request, UserRepository $userRepository)
     {
         $user = new User();
 
@@ -24,9 +25,19 @@ class LoginController extends AbstractController
             "action" => $this->generateUrl("postlogin")
         ]);
 
+        // USER RANK POUR LE MENU **SI** L'USER EST CONNECTE
+        if ($sessionService->isLogin()) {
+            $userRank = $userRepository->find($sessionService->getId())
+                ->getRank()->getId();
+        } else {
+            $userRank = 0;
+        }
+
         return $this->render('login/index.html.twig', [
             'userLoginForm' => $form->createView(),
-            "err" => $request->query->get("err")
+            "err" => $request->query->get("err"),
+            "isLogin" => $sessionService->isLogin(),
+            "userRank" => $userRank
         ]);
     }
 

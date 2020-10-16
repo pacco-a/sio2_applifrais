@@ -1,0 +1,16 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Intranet GSB
+{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="style.css">
+{% endblock %}
+
+{% block body %}
+
+    {% include "layouts/pageindic.html.twig" with {'page_indic':'Fiche'} %}
+
+    Test de contenu pour fiche
+
+{% endblock %}

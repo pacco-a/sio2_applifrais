@@ -13,6 +13,28 @@
 {# include : HEADER #}
 {% include "layouts/header.html.twig" %}
 
+<menu class="main-menu">
+    <ul>
+        <li><a href="{{ path('index') }}">Accueil</a></li>
+        {# CHECK RANK #}
+        {% if userRank == 3 %}
+            <li><a href="{{ path('fiche') }}">Fiche de frais</a></li>
+        {% elseif userRank == 2 %}
+            <li>Valider fiche</li>
+        {% elseif userRank == 1 %}
+            <li>Panneau administrateur</li>
+        {% endif %}
+        {# CHECK IF LOGIN #}
+        {% if isLogin %}
+            {# TODO profil page #}
+            <li>Profil</li>
+            <li><a href="{{ path('logout') }}">Deconnexion</a></li>
+        {% else %}
+            <li><a href="{{ path('loginpage') }}">Connexion</a></li>
+        {% endif %}
+    </ul>
+</menu>
+
 {# block : BODY (content) #}
 <div class="content">
     {% block body %}
