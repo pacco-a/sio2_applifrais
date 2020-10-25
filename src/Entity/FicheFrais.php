@@ -61,6 +61,11 @@ class FicheFrais
      */
     private $entreeFraisHorsForfaits;
 
+    /**
+     * @ORM\Column(type="integer")
+     */
+    private $year;
+
     public function __construct()
     {
         $this->entreeFraisForfaits = new ArrayCollection();
@@ -202,6 +207,18 @@ class FicheFrais
                 $entreeFraisHorsForfait->setFicheFrais(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getYear(): ?int
+    {
+        return $this->year;
+    }
+
+    public function setYear(int $year): self
+    {
+        $this->year = $year;
 
         return $this;
     }

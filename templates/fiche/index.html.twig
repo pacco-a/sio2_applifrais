@@ -5,12 +5,86 @@
 
 {% block stylesheets %}
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="fiche.css">
 {% endblock %}
 
 {% block body %}
 
     {% include "layouts/pageindic.html.twig" with {'page_indic':'Fiche'} %}
 
-    Test de contenu pour fiche
+    <div class="fiche-div">
+        <h2>Fiche du {{ fiche.month }}/{{ fiche.year }}</h2>
 
+        <h3>frais forfaits</h3>
+        <table style="width:100%">
+            <tr>
+                <th>Nom du frais</th>
+                <th>Quantitée</th>
+            </tr>
+
+            {% for frais in fraisForfaits %}
+                <tr>
+                    <td>{{ frais.libelle }}</td>
+                    <td>{{ frais.quantity }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+
+        <h3>frais hors forfaits</h3>
+        <table style="width:100%">
+            <tr>
+                <th>Nom du frais</th>
+                <th>Prix unitaire</th>
+                <th>Quantitée</th>
+            </tr>
+            <tr>
+                <td>Forfait Etape</td>
+                <td>23€</td>
+                <td>6</td>
+            </tr>
+            <tr>
+                <td>Nuitée Hôtel</td>
+                <td>74€</td>
+                <td>3</td>
+            </tr>
+        </table>
+
+        <br>
+
+        <form class="addfrais-form" method="post" action="{{ path('addfrais') }}">
+            <h3>Nouveau frais</h3>
+            <div>
+                <label for="type-frais">Type de frais</label>
+                <select name="type-frais" id="type-frais">
+                    <option value="forfait">Forfait</option>
+                    <option value="horsforfait">Hors forfait</option>
+                </select>
+            </div>
+
+            <div class="en-forfait">
+                <label for="frais-select" >Frais forfait</label>
+                <select name="frais-select" id="frais-select">
+                    <option value="1">Etape</option>
+                    <option value="2">Kilométrique</option>
+                    <option value="3">Nuitée Hôtel</option>
+                    <option value="4">Repas Restaurant</option>
+                </select>
+            </div>
+
+            <input type="text" class="hors-forfait" id="nom-frais" name="nom-frais" placeholder="Libelle du frais">
+
+            <input type="text" class="hors-forfait" id="prix-frais" name="prix-frais" placeholder="Prix du frais">
+            <input type="text" id="quantite-frais" name="quantite-frais" placeholder="Quantité">
+
+            <button type="submit">Ajouter</button>
+
+        </form>
+
+
+    </div>
+
+{% endblock %}
+
+{% block javascripts %}
+    <script src="{{ asset('js/fiche.js') }}"></script>
 {% endblock %}
