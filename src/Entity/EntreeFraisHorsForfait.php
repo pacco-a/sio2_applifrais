@@ -29,14 +29,14 @@ class EntreeFraisHorsForfait
     private $libelle;
 
     /**
-     * @ORM\Column(type="date")
+     * @ORM\Column(type="float")
      */
-    private $date;
+    private $quantity;
 
     /**
      * @ORM\Column(type="float")
      */
-    private $amount;
+    private $price;
 
     public function getId(): ?int
     {
@@ -67,26 +67,27 @@ class EntreeFraisHorsForfait
         return $this;
     }
 
-    public function getDate(): ?\DateTimeInterface
+
+    public function getQuantity(): ?float
     {
-        return $this->date;
+        return $this->quantity;
     }
 
-    public function setDate(\DateTimeInterface $date): self
+    public function setQuantity(float $quantity): self
     {
-        $this->date = $date;
+        $this->quantity = $quantity;
 
         return $this;
     }
 
-    public function getAmount(): ?float
+    public function getPrice(): ?float
     {
-        return $this->amount;
+        return $this->price;
     }
 
-    public function setAmount(float $amount): self
+    public function setPrice(float $price): self
     {
-        $this->amount = $amount;
+        $this->price = $price;
 
         return $this;
     }

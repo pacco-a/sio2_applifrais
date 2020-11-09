@@ -37,16 +37,13 @@
                 <th>Prix unitaire</th>
                 <th>Quantitée</th>
             </tr>
-            <tr>
-                <td>Forfait Etape</td>
-                <td>23€</td>
-                <td>6</td>
-            </tr>
-            <tr>
-                <td>Nuitée Hôtel</td>
-                <td>74€</td>
-                <td>3</td>
-            </tr>
+            {% for frais in fraisHorsForfaits %}
+                <tr>
+                    <td>{{ frais.libelle }}</td>
+                    <td>{{ frais.price }}€</td>
+                    <td>{{ frais.quantity }}</td>
+                </tr>
+            {% endfor %}
         </table>
 
         <br>

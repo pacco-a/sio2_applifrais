@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\EntreeFraisForfait;
+use App\Entity\EntreeFraisHorsForfait;
 use App\Entity\FicheFrais;
 use App\Repository\EtatRepository;
 use App\Repository\FicheFraisRepository;
@@ -55,16 +56,6 @@ class FicheController extends AbstractController
             "year" => intval($this->currentDate->format("Y")),
             "idVisisteur" => $sessionService->getId()]);
 
-        //une liste des objets entree frais forfaits
-        //qu'on formatte un peu pour la vue.
-        $allFraisForfaitObj = $fiche->getEntreeFraisForfaits()->getValues();
-        $allFraisForfait = array();
-
-        foreach ($allFraisForfaitObj as $oneFraisForfait) {
-            array_push($allFraisForfait, ["quantity" => $oneFraisForfait->getQuantity(),
-                "libelle" => $oneFraisForfait->getFraisForfait()->getLibelle()]);
-        }
-
         // -- si elle n'existe pas la créer
         $entityManager = $this->getDoctrine()->getManager();
 
@@ -84,6 +75,24 @@ class FicheController extends AbstractController
 
         }
 
+        //une liste des objets entree frais forfaits
+        //qu'on formatte un peu pour la vue.
+        $allFraisForfaitObj = $fiche->getEntreeFraisForfaits()->getValues();
+        $allFraisForfait = array();
+
+        foreach ($allFraisForfaitObj as $oneFraisForfait) {
+            array_push($allFraisForfait, ["quantity" => $oneFraisForfait->getQuantity(),
+                "libelle" => $oneFraisForfait->getFraisForfait()->getLibelle()]);
+        }
+
+        $allFraisHorsForfaitObj = $fiche->getEntreeFraisHorsForfaits()->getValues();
+        $allFraisHorsForfait = array();
+
+        foreach ($allFraisHorsForfaitObj as $oneFraisHorsForfait) {
+            array_push($allFraisHorsForfait, ["quantity" => $oneFraisHorsForfait->getQuantity(),
+                "libelle" => $oneFraisHorsForfait->getLibelle(), "price" => $oneFraisHorsForfait->getPrice()]);
+        }
+
         // USER RANK POUR LE MENU **SI** L'USER EST CONNECTE
         if ($sessionService->isLogin()) {
             $userRank = $this->userRepository->find($sessionService->getId())
@@ -97,6 +106,7 @@ class FicheController extends AbstractController
             "userRank" => $userRank,
             "fiche" => $fiche,
             "fraisForfaits" => $allFraisForfait,
+            "fraisHorsForfaits" => $allFraisHorsForfait
         ]);
     }
 
@@ -105,7 +115,7 @@ class FicheController extends AbstractController
      */
     public function addEntreeFrais(Request $request, SessionService $sessionService, FraisForfaitRepository $fraisForfaitRepository)
     {
-        dump($request->request);
+        // dump($request->request);
         /**
          * EXEMPLE
          * [
@@ -131,11 +141,33 @@ class FicheController extends AbstractController
             return $this->redirectToRoute("fiche");
         }
 
+
         // CREER L'ENTREE FRAIS
 
         $entityManager = $this->getDoctrine()->getManager();
 
-        if ($request->request->get("type-frais") === "forfait") {
+        /**
+         * Si le frais existe déjà dans une certaine quantité,
+         * additionner celle ci à la place.
+         */
+
+        $entreeFraisAlreadyExists = false;
+
+//        dump($fiche->getEntreeFraisForfaits()->getValues());
+
+        $entreeFraisToEdit = null;
+
+        foreach ($fiche->getEntreeFraisForfaits()->getValues() as $entreeFrais) {
+
+            if ($entreeFrais->getFraisForfait()->getId() == intval($request->request->get("frais-select"))) {
+                $entreeFraisAlreadyExists = true;
+                $entreeFraisToEdit = $entreeFrais;
+                break;
+            }
+        }
+
+
+        if ($request->request->get("type-frais") === "forfait" && !$entreeFraisAlreadyExists) {
             $newEntreeFrais = new EntreeFraisForfait();
 
             // set datas
@@ -143,16 +175,32 @@ class FicheController extends AbstractController
             $newEntreeFrais->setQuantity($request->request->get("quantite-frais"));
 
 
-
             $newEntreeFrais->setFraisForfait($fraisForfaitRepository->find(intval($request->request->get("frais-select"))));
 
             // -- -- validate & send
             $entityManager->persist($newEntreeFrais);
             $entityManager->flush();
+        } else if ($request->request->get("type-frais") === "forfait" && $entreeFraisAlreadyExists) {
 
-        } else {
-            dump("todo : frais hors forfait");
-            die();
+            $entreeFraisToEdit->setQuantity($entreeFraisToEdit->getQuantity() + $request->request->get("quantite-frais"));
+            $entityManager->persist($entreeFraisToEdit);
+            $entityManager->flush();
+
+        } else if ($request->request->get("type-frais") === "horsforfait") {
+
+//            dump($request->request->get("nom-frais"));
+//            die();
+
+            $newEntreeFraisHorsForfait = new EntreeFraisHorsForfait();
+            $newEntreeFraisHorsForfait->setFicheFrais($fiche);
+            $newEntreeFraisHorsForfait->setQuantity(intval($request->request->get("quantite-frais")));
+            $newEntreeFraisHorsForfait->setPrice(intval($request->request->get("prix-frais")));
+            $newEntreeFraisHorsForfait->setLibelle($request->request->get("nom-frais"));
+
+            $entityManager->persist($newEntreeFraisHorsForfait);
+            $entityManager->flush();
+
+
         }
 
 
