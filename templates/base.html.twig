@@ -17,20 +17,20 @@
     <ul>
         <li><a href="{{ path('index') }}">Accueil</a></li>
         {# CHECK RANK #}
-        {% if userRank == 3 %}
+        {% if is_granted("ROLE_VIS") %}
             <li><a href="{{ path('fiche') }}">Fiche de frais</a></li>
-        {% elseif userRank == 2 %}
+        {% elseif is_granted("ROLE_COMP") %}
             <li>Valider fiche</li>
-        {% elseif userRank == 1 %}
+        {% elseif is_granted("ROLE_ADMIN") %}
             <li>Panneau administrateur</li>
         {% endif %}
         {# CHECK IF LOGIN #}
-        {% if isLogin %}
+        {% if is_granted("IS_AUTHENTICATED_FULLY") %}
             {# TODO profil page #}
             <li>Profil</li>
-            <li><a href="{{ path('logout') }}">Deconnexion</a></li>
+            <li><a href="{{ path('security_logoutlogout') }}">Deconnexion</a></li>
         {% else %}
-            <li><a href="{{ path('loginpage') }}">Connexion</a></li>
+            <li><a href="{{ path('security_login') }}">Connexion</a></li>
         {% endif %}
     </ul>
 </menu>

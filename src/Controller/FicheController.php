@@ -115,6 +115,9 @@ class FicheController extends AbstractController
      */
     public function addEntreeFrais(Request $request, SessionService $sessionService, FraisForfaitRepository $fraisForfaitRepository)
     {
+
+        //TODO supprimer debug, tout le reste marche juste pour un test
+
         // dump($request->request);
         /**
          * EXEMPLE

@@ -4,12 +4,12 @@ security:
             algorithm: auto
     # https://symfony.com/doc/current/security.html#where-do-users-come-from-user-providers
     role_hierarchy:
-        ROLE_SUPER_ADMIN: [ROLE_VIS, ROLE_COMP]
+        ROLE_ADMIN: [ROLE_VIS, ROLE_COMP]
     providers:
         app_user_provider:
             entity:
                 class: App\Entity\User
-                property: email
+                property: username
     firewalls:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
