@@ -10,106 +10,36 @@ use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
 class LoginController extends AbstractController
 {
 
     /**
-     * @Route("/login", name="loginpage", methods={"GET"})
+     * @Route("/login", name="security_login")
      */
-    public function getloginpage(SessionService $sessionService, LoggerInterface $logger, Request $request, UserRepository $userRepository)
+    public function getloginpage(AuthenticationUtils $authenticationUtils, Request $request, UserRepository $userRepository)
     {
-        $user = new User();
-
-        $form = $this->createForm(UserLoginType::class, $user, [
-            "action" => $this->generateUrl("postlogin")
-        ]);
-
-        // USER RANK POUR LE MENU **SI** L'USER EST CONNECTE
-        if ($sessionService->isLogin()) {
-            $userRank = $userRepository->find($sessionService->getId())
-                ->getRank()->getId();
-        } else {
-            $userRank = 0;
-        }
-
-        return $this->render('login/index.html.twig', [
-            'userLoginForm' => $form->createView(),
-            "err" => $request->query->get("err"),
-            "isLogin" => $sessionService->isLogin(),
-            "userRank" => $userRank
-        ]);
-    }
-
-    /**
-     * @Route("/login", name="postlogin", methods={"POST"})
-     */
-    public function postLogin(Request $request, SessionService $sessionService)
-    {
-        $user = new User();
-
-        $form = $this->createForm(UserLoginType::class, $user);
-
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            $user = $form->getData();
-        } else {
-            $this->redirectToRoute("loginpage");
-        }
-
-        $userObject = $this->getDoctrine()
-            ->getRepository(User::class)
-            ->findOneBy(["login" => $user->getLogin()]);
-
-        // SI aucun utilisateur trouvé, redirection
-        if (!$userObject) {
-            return $this->redirectToRoute("loginpage", ["err" => "nouser"]);
-        }
-
-        // VERIFICATION mot de passe SINON redirection
-        if ($userObject->getPassword() != $user->getPassword()) {
-            return $this->redirectToRoute("loginpage", ["err" => "wrgpass"]);
-        }
-
-
-        // AFFECTATION ID dans la SESSION
-        $sessionService->connectSession($userObject->getId());
-
-        // REDIRECTION vers l'index ("/")
-
-        $userRank = $userObject->getRank()->getId();
-
-        switch ($userRank) {
-            //ADMIN
-            case 1:
-                dump("TODO: admin route");
-                die();
-                break;
-            // COMPTABLE
-            case 2:
-                dump("TODO: comptable route");
-                die();
-                break;
-            // VISITEUR
-            case 3:
-                return $this->redirectToRoute("visiteur");
-        }
-
+        dump($userRepository->find(8)->getRoles());
         die();
-        return $this->redirectToRoute("index");
+
+        // get the login error if there is one
+        $error = $authenticationUtils->getLastAuthenticationError();
+
+        // last username entered by the user
+        $lastUsername = $authenticationUtils->getLastUsername();
+
+        return $this->render("login/index.html.twig", [
+            "last_username" => $lastUsername,
+            "error" => $error,
+            "err" => $request->query->get("err"),
+        ]);
     }
 
     /**
-     * @Route("/deconnexion", name="logout", methods={"GET"})
+     * @Route("/deconnexion", name="security_logout")
      */
-    public function logout(Request $request, SessionService $sessionService)
-    {
-        if (!$sessionService->isLogin()) {
-            return $this->redirectToRoute("index");
-        }
-
-        $sessionService->logoutSession();
-        return $this->redirectToRoute("loginpage");
+    public function logout() {
+        //TODO fin page 2
     }
 }

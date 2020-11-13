@@ -3,7 +3,10 @@
 namespace App\Controller;
 
 use App\Entity\User;
+use App\Repository\UserRepository;
 use App\Service\SessionService;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -11,15 +14,10 @@ class IndexController extends AbstractController
 {
     /**
      * @Route("/", name="index")
+     * @Security("is_granted('IIS_AUTHENTICATED_FULLY')")
      */
     public function index(SessionService $sessionService)
     {
-        // ROUTE POUR USERS LOGGES
-        if (!$sessionService->isLogin()) {
-            return $this->redirectToRoute("loginpage", [
-                "err" => "accsden",
-            ]);
-        }
 
         // USER RANK POUR LE MENU
         $userRank = $this->getDoctrine()
@@ -30,7 +28,6 @@ class IndexController extends AbstractController
 
 
         return $this->render('index/index.html.twig', [
-            "isLogin" => $sessionService->isLogin(),
             "userRank" => $userRank
         ]);
     }

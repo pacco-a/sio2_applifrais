@@ -1,15 +1,35 @@
 security:
+    encoders:
+        App\Entity\User:
+            algorithm: auto
     # https://symfony.com/doc/current/security.html#where-do-users-come-from-user-providers
+    role_hierarchy:
+        ROLE_SUPER_ADMIN: [ROLE_VIS, ROLE_COMP]
     providers:
-        users_in_memory: { memory: null }
+        app_user_provider:
+            entity:
+                class: App\Entity\User
+                property: email
     firewalls:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
         main:
+            security: true
             anonymous: true
             lazy: true
-            provider: users_in_memory
+            provider: app_user_provider
+            access_denied_url: /
+
+            form_login:
+                default_target_path: index
+                csrf_token_generator: security.csrf.token_manager
+                login_path: security_login
+                check_path: security_login
+
+            logout:
+                path: security_logout
+                target: security_login
 
             # activate different ways to authenticate
             # https://symfony.com/doc/current/security.html#firewalls-authentication
