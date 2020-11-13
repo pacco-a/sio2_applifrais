@@ -6,10 +6,12 @@ use App\Entity\User;
 use App\Form\UserLoginType;
 use App\Form\UserRegisterType;
 use App\Repository\UserRepository;
+use Doctrine\ORM\EntityManager;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
 class LoginController extends AbstractController
@@ -18,7 +20,7 @@ class LoginController extends AbstractController
     /**
      * @Route("/login", name="security_login")
      */
-    public function getloginpage(AuthenticationUtils $authenticationUtils, Request $request, UserRepository $userRepository)
+    public function getloginpage( AuthenticationUtils $authenticationUtils, Request $request, UserRepository $userRepository)
     {
         //build TEMPORARY form for first incription
         //TODO delete when done
@@ -54,9 +56,32 @@ class LoginController extends AbstractController
     /**
      * @Route("/register", name="register")
      */
-    public function register(Request $request)
+    //TODO route accessible qu'aux ADMIN
+    public function register( UserPasswordEncoderInterface $passwordEncoder, Request $request)
     {
 
+        $user = new User();
+
+        $form = $this->createForm(UserRegisterType::class, $user);
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+
+            $user->setUsername($form->getData()->getUsername());
+            $user->setFirstname($form->getData()->getFirstname());
+            $user->setPassword($passwordEncoder->encodePassword($user, $form->getData()->getPassword()));
+            $user->setEmail($form->getData()->getEmail());
+
+            $entityManager = $this->getDoctrine()->getManager();
+            $entityManager->persist($user);
+            $entityManager->flush();
+
+        } else {
+            $this->redirectToRoute("loginpage");
+        }
+
+        die();
         return $this->json(["request" => $request->request->all()]);
     }
 }

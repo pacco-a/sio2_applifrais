@@ -136,7 +136,7 @@ class User implements UserInterface
         return $this->address;
     }
 
-    public function setAdress(string $adress): self
+    public function setAddress(string $adress): self
     {
         $this->adress = $adress;
 

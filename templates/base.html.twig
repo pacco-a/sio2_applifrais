@@ -28,7 +28,7 @@
         {% if is_granted("IS_AUTHENTICATED_FULLY") %}
             {# TODO profil page #}
             <li>Profil</li>
-            <li><a href="{{ path('security_logoutlogout') }}">Deconnexion</a></li>
+            <li><a href="{{ path('security_logout') }}">Deconnexion</a></li>
         {% else %}
             <li><a href="{{ path('security_login') }}">Connexion</a></li>
         {% endif %}
