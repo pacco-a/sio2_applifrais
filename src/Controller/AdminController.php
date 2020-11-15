@@ -5,6 +5,9 @@ namespace App\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
+use App\Entity\User;
+use App\Form\UserRegisterType;
 
 class AdminController extends AbstractController
 {
@@ -21,8 +24,15 @@ class AdminController extends AbstractController
      * @Route("/gestmember", name="gest_member")
      * @Security("is_granted('ROLE_ADMIN')")
      */
-    public function gestmember()
+    public function gestmember(AuthenticationUtils $authenticationUtils)
     {
-        return $this->render('admin/gestmember.html.twig');
+        $user = new User();
+
+        $form = $this->createForm(UserRegisterType::class, $user, [
+            "action" => $this->generateUrl("register") ]);
+
+        return $this->render('admin/gestmember.html.twig', [
+            "registerForm" => $form->createView(),
+        ]);
     }
 }

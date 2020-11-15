@@ -7,6 +7,7 @@ use App\Form\UserLoginType;
 use App\Form\UserRegisterType;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManager;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -25,11 +26,6 @@ class LoginController extends AbstractController
         //build TEMPORARY form for first incription
         //TODO delete when done
 
-        $user = new User();
-
-        $form = $this->createForm(UserRegisterType::class, $user, [
-            "action" => $this->generateUrl("register") ]);
-
         // get the login error if there is one
         $error = $authenticationUtils->getLastAuthenticationError();
 
@@ -37,8 +33,7 @@ class LoginController extends AbstractController
         $lastUsername = $authenticationUtils->getLastUsername();
 
 
-        return $this->render("login/index.html.twig", [
-            "registerForm" => $form->createView(),
+        return $this->render("login/login.html.twig", [
             "last_username" => $lastUsername,
             "error" => $error,
             "err" => $request->query->get("err")
@@ -55,8 +50,8 @@ class LoginController extends AbstractController
 
     /**
      * @Route("/register", name="register")
+     * @Security("is_granted('ROLE_ADMIN')")
      */
-    //TODO route accessible qu'aux ADMIN
     public function register( UserPasswordEncoderInterface $passwordEncoder, Request $request)
     {
 
@@ -77,11 +72,12 @@ class LoginController extends AbstractController
             $entityManager->persist($user);
             $entityManager->flush();
 
+            $this->redirectToRoute("admin");
+            //TODO changer la redirection vers la page d'ajout de comptes
+
         } else {
             $this->redirectToRoute("loginpage");
         }
 
-        die();
-        return $this->json(["request" => $request->request->all()]);
     }
 }
