@@ -22,7 +22,7 @@
         {% elseif is_granted("ROLE_COMP") %}
             <li>Valider fiche</li>
         {% elseif is_granted("ROLE_ADMIN") %}
-            <li>Panneau administrateur</li>
+            <li><a href="{{ path('admin') }}">Panneau administrateur</a></li>
         {% endif %}
         {# CHECK IF LOGIN #}
         {% if is_granted("IS_AUTHENTICATED_FULLY") %}

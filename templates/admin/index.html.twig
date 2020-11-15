@@ -1,0 +1,17 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Intranet GSB
+{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="style.css">
+{% endblock %}
+
+{% block body %}
+
+    {% include "layouts/pageindic.html.twig" with {'page_indic':'Panneau d\'administration'} %}
+
+    <ul>
+        <li><a href="{{ path('gest_member') }}">Gestion des membres</a></li>
+    </ul>
+{% endblock %}
