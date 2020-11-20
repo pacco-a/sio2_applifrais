@@ -9,7 +9,6 @@ use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManager;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
@@ -23,8 +22,6 @@ class LoginController extends AbstractController
      */
     public function getloginpage( AuthenticationUtils $authenticationUtils, Request $request, UserRepository $userRepository)
     {
-        //build TEMPORARY form for first incription
-        //TODO delete when done
 
         // get the login error if there is one
         $error = $authenticationUtils->getLastAuthenticationError();
@@ -72,12 +69,13 @@ class LoginController extends AbstractController
             $entityManager->persist($user);
             $entityManager->flush();
 
-            $this->redirectToRoute("admin");
-            //TODO changer la redirection vers la page d'ajout de comptes
+            $this->redirectToRoute("gest_member");
 
         } else {
-            $this->redirectToRoute("loginpage");
+            $this->redirectToRoute("security_login");
         }
+
+        $this->redirectToRoute("security_login");
 
     }
 }

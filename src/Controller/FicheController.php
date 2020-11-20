@@ -9,11 +9,12 @@ use App\Repository\EtatRepository;
 use App\Repository\FicheFraisRepository;
 use App\Repository\FraisForfaitRepository;
 use App\Repository\UserRepository;
-use App\Service\SessionService;
 use DateTime;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Core\Security;
 
 class FicheController extends AbstractController
 {
@@ -30,8 +31,9 @@ class FicheController extends AbstractController
 
     /**
      * @Route("/fiche", name="fiche")
+     * @IsGranted("ROLE_VIS")
      */
-    public function index(SessionService $sessionService, EtatRepository $etatRepository)
+    public function index(Security $security, EtatRepository $etatRepository)
     {
 
         /**
@@ -46,22 +48,17 @@ class FicheController extends AbstractController
          *  mais stylé.
          */
 
-        //ROUTE UNIQUEMENT POUR VISITEURS
-        if (!$sessionService->isRank(3)) {
-            return $this->redirectToRoute("index");
-        }
-
         // VERIFIER SI LA FICHE EXISTE DEJA OU NON
         $fiche = $this->ficheFraisRepository->findOneBy(["month" => intval($this->currentDate->format("m")),
             "year" => intval($this->currentDate->format("Y")),
-            "idVisisteur" => $sessionService->getId()]);
+            "idVisisteur" => $security->getUser()->getId()]);
 
         // -- si elle n'existe pas la créer
         $entityManager = $this->getDoctrine()->getManager();
 
         if (!$fiche) {
             $fiche = new FicheFrais();
-            $fiche->setIdVisisteur($this->userRepository->find($sessionService->getId()))
+            $fiche->setIdVisisteur($this->userRepository->find($security->getUser()->getId()))
                 ->setIdEtat($etatRepository->find(1))
                 ->setMonth($this->currentDate->format("m"))
                 ->setNbProofs(0)
@@ -93,17 +90,9 @@ class FicheController extends AbstractController
                 "libelle" => $oneFraisHorsForfait->getLibelle(), "price" => $oneFraisHorsForfait->getPrice()]);
         }
 
-        // USER RANK POUR LE MENU **SI** L'USER EST CONNECTE
-        if ($sessionService->isLogin()) {
-            $userRank = $this->userRepository->find($sessionService->getId())
-                ->getRank()->getId();
-        } else {
-            $userRank = 0;
-        }
 
         return $this->render('fiche/index.html.twig', [
-            "isLogin" => $sessionService->isLogin(),
-            "userRank" => $userRank,
+            "isLogin" => !is_null($security->getUser()),
             "fiche" => $fiche,
             "fraisForfaits" => $allFraisForfait,
             "fraisHorsForfaits" => $allFraisHorsForfait
@@ -112,9 +101,12 @@ class FicheController extends AbstractController
 
     /**
      * @Route("/addfrais", name="addfrais", methods={"POST"})
+     * @IsGranted("ROLE_VIS")
      */
-    public function addEntreeFrais(Request $request, SessionService $sessionService, FraisForfaitRepository $fraisForfaitRepository)
+    public function addEntreeFrais(Security $security, Request $request, FraisForfaitRepository $fraisForfaitRepository)
     {
+        dump("ici1");
+
 
         // dump($request->request);
         /**
@@ -131,7 +123,9 @@ class FicheController extends AbstractController
         // VERIFIER SI LA FICHE EXISTE DEJA OU NON
         $fiche = $this->ficheFraisRepository->findOneBy(["month" => intval($this->currentDate->format("m")),
             "year" => intval($this->currentDate->format("Y")),
-            "idVisisteur" => $sessionService->getId()]);
+            "idVisisteur" => $security->getUser()->getId()]);
+
+        dump($fiche);
 
         /**
          * SI la fiche n'existe pas rediriger vers la page "fiche"
@@ -142,6 +136,7 @@ class FicheController extends AbstractController
             return $this->redirectToRoute("fiche");
         }
 
+        dump("ici2");
 
         // CREER L'ENTREE FRAIS
 
@@ -167,6 +162,8 @@ class FicheController extends AbstractController
             }
         }
 
+        dump("ici3");
+
 
         if ($request->request->get("type-frais") === "forfait" && !$entreeFraisAlreadyExists) {
             $newEntreeFrais = new EntreeFraisForfait();
@@ -178,6 +175,8 @@ class FicheController extends AbstractController
 
             $newEntreeFrais->setFraisForfait($fraisForfaitRepository->find(intval($request->request->get("frais-select"))));
 
+            dump($newEntreeFrais);
+
             // -- -- validate & send
             $entityManager->persist($newEntreeFrais);
             $entityManager->flush();
@@ -187,10 +186,10 @@ class FicheController extends AbstractController
             $entityManager->persist($entreeFraisToEdit);
             $entityManager->flush();
 
+
         } else if ($request->request->get("type-frais") === "horsforfait") {
 
-//            dump($request->request->get("nom-frais"));
-//            die();
+            // dump($request->request->get("nom-frais"));
 
             $newEntreeFraisHorsForfait = new EntreeFraisHorsForfait();
             $newEntreeFraisHorsForfait->setFicheFrais($fiche);
@@ -201,12 +200,58 @@ class FicheController extends AbstractController
             $entityManager->persist($newEntreeFraisHorsForfait);
             $entityManager->flush();
 
-
         }
+
+        dump("ici4");
 
 
         return $this->redirectToRoute("fiche");
 
 
     }
+
+
+    /**
+     * @Route("/validation", name="validation_page")
+     * @IsGranted("ROLE_COMP")
+     */
+    public function getValidationPage(Request $request, UserRepository $userRepository, FicheFraisRepository $ficheFraisRepository)
+    {
+        //TODO coder valdiation de fiche
+
+        $ficheChoisie = null;
+        $visiteurUsername = null;
+
+        $allFraisForfait = array();
+        $allFraisHorsForfait = array();
+
+
+        if ($request->query->get("moisChoice") && $request->query->get("anneeChoice") && $request->query->get("visiteur")) {
+
+            $ficheChoisie = $ficheFraisRepository->findOneBy(["month" => $request->query->get("moisChoice"), "year" => $request->query->get("anneeChoice"), "idVisisteur" => $request->query->get("visiteur")]);
+            $visiteurUsername = $userRepository->find($request->query->get("visiteur"))->getUsername();
+
+            $allFraisForfaitObj = $ficheChoisie->getEntreeFraisForfaits()->getValues();
+
+
+            foreach ($allFraisForfaitObj as $oneFraisForfait) {
+                array_push($allFraisForfait, ["quantity" => $oneFraisForfait->getQuantity(),
+                    "libelle" => $oneFraisForfait->getFraisForfait()->getLibelle()]);
+            }
+
+            $allFraisHorsForfaitObj = $ficheChoisie->getEntreeFraisHorsForfaits()->getValues();
+
+
+            foreach ($allFraisHorsForfaitObj as $oneFraisHorsForfait) {
+                array_push($allFraisHorsForfait, ["quantity" => $oneFraisHorsForfait->getQuantity(),
+                    "libelle" => $oneFraisHorsForfait->getLibelle(), "price" => $oneFraisHorsForfait->getPrice()]);
+            }
+
+        }
+
+        $visiteurs = $userRepository->findByRole("ROLE_VIS");
+
+        return $this->render("fiche/valid.html.twig", ["ficheChoisie" => $ficheChoisie, "visiteurUsername" => $visiteurUsername, "visiteurs" => $visiteurs, "fraisForfaits" => $allFraisForfait, "fraisHorsForfaits" => $allFraisHorsForfait]);
+    }
+
 }

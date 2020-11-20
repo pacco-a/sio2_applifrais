@@ -28,7 +28,7 @@ class User implements UserInterface
     /**
      * @ORM\Column(type="json")
      */
-    private $roles = [];
+    private $roles = ["ROLE_VIS"];
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)

@@ -1,7 +1,4 @@
-const addfraisButton = document.querySelector(".addfrais-button");
 const addfraisForm = document.querySelector(".addfrais-form");
-
-console.log("v1");
 
 addfraisForm.addEventListener("change", (e) => {
   const allEnForfait = document.querySelectorAll(".en-forfait");
@@ -33,8 +30,7 @@ addfraisForm.addEventListener("submit", (e) => {
     if (addfraisForm["quantite-frais"].value.length == 0) {
       console.log("valeurs vides");
     } else {
-      addfraisButton.submit();
-      return;
+      addfraisForm.submit();
     }
   } else if (addfraisForm["type-frais"].value === "horsforfait") {
     if (

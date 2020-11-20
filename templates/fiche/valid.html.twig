@@ -1,0 +1,72 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Intranet GSB
+{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="style.css">
+{% endblock %}
+
+{% block body %}
+
+    {% include "layouts/pageindic.html.twig" with {'page_indic':'Validation de fiche'} %}
+
+    {#    CONTENU EN CAS DE FICHE NON CHOISIE#}
+    {% if ficheChoisie is not null %}
+        <h2>Fiche du {{ ficheChoisie.month }}/{{ ficheChoisie.year }} de {{ visiteurUsername }}</h2>
+
+        {% if ficheChoisie.idEtat.id == 1 %}
+            <h3 style="background-color: yellow; border-radius: 25%; padding: 5px 0px; text-align: center">Fiche en cours de saisie</h3>
+        {% elseif ficheChoisie.idEtat.id == 2 %}
+            <h3 style="background-color: orange; border-radius: 25%; padding: 5px 0px; text-align: center">Saisie cloturée</h3>
+        {% elseif ficheChoisie.idEtat.id == 3 %}
+            <h3 style="background-color: greenyellow; border-radius: 25%; padding: 5px 0px; text-align: center">Validée en cours de paiement</h3>
+        {% elseif ficheChoisie.idEtat.id == 4 %}
+            <h3 style="background-color: green; border-radius: 25%; padding: 5px 0px; text-align: center">Remboursée.</h3>
+        {% endif %}
+
+        <h3>frais forfaits</h3>
+        <table style="width:100%">
+            <tr>
+                <th>Nom du frais</th>
+                <th>Quantitée</th>
+            </tr>
+
+            {% for frais in fraisForfaits %}
+                <tr>
+                    <td>{{ frais.libelle }}</td>
+                    <td>{{ frais.quantity }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+
+        <h3>frais hors forfaits</h3>
+        <table style="width:100%">
+            <tr>
+                <th>Nom du frais</th>
+                <th>Prix unitaire</th>
+                <th>Quantitée</th>
+            </tr>
+            {% for frais in fraisHorsForfaits %}
+                <tr>
+                    <td>{{ frais.libelle }}</td>
+                    <td>{{ frais.price }}€</td>
+                    <td>{{ frais.quantity }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+    {#    CONTENU EN CAS DE FICHE CHOISIE#}
+        <form action="{{ path('validation_page') }}" method="get">
+            <input type="number" name="moisChoice" placeholder="mois (ex: 11)" />
+            <input type="number" name="anneeChoice" placeholder="annee (ex: 2020)" />
+            <select name="visiteur" id="visiteur">
+                {% for visiteur in visiteurs %}
+                    <option value="{{ visiteur.getId() }}">{{ visiteur.getUsername() }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit" >Valider</button>
+        </form>
+    {% endif %}
+
+{% endblock %}
