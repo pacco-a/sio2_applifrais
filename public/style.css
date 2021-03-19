@@ -26,6 +26,11 @@ a {
   text-decoration: none; /* no underline */
 }
 
+/* SPOILER : ALL PAGES */
+.spoilercontent-1 {
+  display: none;
+}
+
 /* MENU : ALL PAGES*/
 .main-menu {
   padding: 0px 0px;

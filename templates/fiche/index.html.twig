@@ -16,13 +16,17 @@
         <h2>Fiche du {{ fiche.month }}/{{ fiche.year }}</h2>
 
         {% if fiche.idEtat.id == 1 %}
-        <h3 style="background-color: yellow; border-radius: 25%; padding: 5px 0px; text-align: center">Fiche en cours de saisie</h3>
+            <h3 style="background-color: yellow; border-radius: 25%; padding: 5px 0px; text-align: center">Fiche en
+                cours de saisie</h3>
         {% elseif fiche.idEtat.id == 2 %}
-        <h3 style="background-color: orange; border-radius: 25%; padding: 5px 0px; text-align: center">Saisie cloturée</h3>
+            <h3 style="background-color: orange; border-radius: 25%; padding: 5px 0px; text-align: center">Saisie
+                cloturée</h3>
         {% elseif fiche.idEtat.id == 3 %}
-        <h3 style="background-color: greenyellow; border-radius: 25%; padding: 5px 0px; text-align: center">Validée en cours de paiement</h3>
+            <h3 style="background-color: greenyellow; border-radius: 25%; padding: 5px 0px; text-align: center">Validée
+                en cours de paiement</h3>
         {% elseif fiche.idEtat.id == 4 %}
-        <h3 style="background-color: green; border-radius: 25%; padding: 5px 0px; text-align: center">Remboursée.</h3>
+            <h3 style="background-color: green; border-radius: 25%; padding: 5px 0px; text-align: center">
+                Remboursée.</h3>
         {% endif %}
 
         <h3>frais forfaits</h3>
@@ -58,34 +62,55 @@
 
         <br>
 
-        <form class="addfrais-form" method="post" action="{{ path('addfrais') }}">
-            <h3>Nouveau frais</h3>
-            <div>
-                <label for="type-frais">Type de frais</label>
-                <select name="type-frais" id="type-frais">
-                    <option value="forfait">Forfait</option>
-                    <option value="horsforfait">Hors forfait</option>
-                </select>
-            </div>
+        <div>
+            <button class="spoilertrigger-1">FAQ : Comment supprimer ou modifier un frais ?</button>
+        </div>
+        <div class="spoilercontent-1">
+            <h3>Supprimer ou modifier un frais :</h3>
+            <p>Pour modifier un frais (addition, soustraction ou suppression),
+                la manipulation est la même : utilisez le formulaire pour ajouter
+                la valeur de votre choix, pour soustraire la valeur passez une valeur
+                négative, pour supprimer un frais : passez une valeur négative dans le
+                champ quantité pour annuler le frais (0) </p>
+        </div>
 
-            <div class="en-forfait">
-                <label for="frais-select" >Frais forfait</label>
-                <select name="frais-select" id="frais-select">
-                    <option value="1">Etape</option>
-                    <option value="2">Kilométrique</option>
-                    <option value="3">Nuitée Hôtel</option>
-                    <option value="4">Repas Restaurant</option>
-                </select>
-            </div>
+        <div id="popup-info">
+        </div>
 
-            <input type="text" class="hors-forfait" id="nom-frais" name="nom-frais" placeholder="Libelle du frais">
+        <br>
 
-            <input type="text" class="hors-forfait" id="prix-frais" name="prix-frais" placeholder="Prix du frais">
-            <input type="text" id="quantite-frais" name="quantite-frais" placeholder="Quantité">
+        {% if fiche.idEtat.id == 1 %}
 
-            <button type="submit" class="addfrais-button">Ajouter</button>
+            <form class="addfrais-form" method="post" action="{{ path('addfrais') }}">
+                <h3>Nouveau frais</h3>
+                <div>
+                    <label for="type-frais">Type de frais</label>
+                    <select name="type-frais" id="type-frais">
+                        <option value="forfait">Forfait</option>
+                        <option value="horsforfait">Hors forfait</option>
+                    </select>
+                </div>
 
-        </form>
+                <div class="en-forfait">
+                    <label for="frais-select">Frais forfait</label>
+                    <select name="frais-select" id="frais-select">
+                        <option value="1">Etape</option>
+                        <option value="2">Kilométrique</option>
+                        <option value="3">Nuitée Hôtel</option>
+                        <option value="4">Repas Restaurant</option>
+                    </select>
+                </div>
+
+                <input type="text" class="hors-forfait" id="nom-frais" name="nom-frais" placeholder="Libelle du frais">
+
+                <input type="text" class="hors-forfait" id="prix-frais" name="prix-frais" placeholder="Prix du frais">
+                <input type="text" id="quantite-frais" name="quantite-frais" placeholder="Quantité">
+
+                <button type="submit" class="addfrais-button">Ajouter</button>
+
+            </form>
+
+        {% endif %}
 
 
     </div>

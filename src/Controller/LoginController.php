@@ -42,7 +42,6 @@ class LoginController extends AbstractController
      */
     public function logout()
     {
-        //TODO fin page 2
     }
 
     /**

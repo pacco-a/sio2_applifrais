@@ -9,6 +9,7 @@ use App\Repository\EtatRepository;
 use App\Repository\FicheFraisRepository;
 use App\Repository\FraisForfaitRepository;
 use App\Repository\UserRepository;
+use App\Service\FicheService;
 use DateTime;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -18,6 +19,12 @@ use Symfony\Component\Security\Core\Security;
 
 class FicheController extends AbstractController
 {
+    /**
+     * TODO faire en sorte qu'on ne puisse pas saisir de valeurs
+     *  si la saisie est cloturée/validée/remboursée, s'assurée que la saisie est
+     *  cloturée si nous ne sommes plus dans le mois courant.
+     */
+
     private $currentDate;
     private $userRepository;
     private $ficheFraisRepository;
@@ -103,11 +110,8 @@ class FicheController extends AbstractController
      * @Route("/addfrais", name="addfrais", methods={"POST"})
      * @IsGranted("ROLE_VIS")
      */
-    public function addEntreeFrais(Security $security, Request $request, FraisForfaitRepository $fraisForfaitRepository)
+    public function addEntreeFrais(Security $security, Request $request, FraisForfaitRepository $fraisForfaitRepository, FicheService $ficheService)
     {
-        dump("ici1");
-
-
         // dump($request->request);
         /**
          * EXEMPLE
@@ -125,22 +129,30 @@ class FicheController extends AbstractController
             "year" => intval($this->currentDate->format("Y")),
             "idVisisteur" => $security->getUser()->getId()]);
 
-        dump($fiche);
-
         /**
          * SI la fiche n'existe pas rediriger vers la page "fiche"
          * ce qui va créer automatiquement une fiche.
+         *
+         * OU si la fiche n'est pas écrivable, renvoyer vers la
+         * page fiche également. :-) (juste par sécurité)
          */
 
+        /**
+         * TODO faire la suppression de frais dans la fiche
+         *  et s'assurer que la fiche est éditable
+         *  ce moment la merci.
+         */
+
+        $entityManager = $this->getDoctrine()->getManager();
+
+        // TODO c'est bizarre ici non ?
         if (!$fiche) {
+            return $this->redirectToRoute("fiche");
+        } else if (!$ficheService->isWritable($fiche, $entityManager)) {
             return $this->redirectToRoute("fiche");
         }
 
-        dump("ici2");
-
         // CREER L'ENTREE FRAIS
-
-        $entityManager = $this->getDoctrine()->getManager();
 
         /**
          * Si le frais existe déjà dans une certaine quantité,
@@ -149,21 +161,34 @@ class FicheController extends AbstractController
 
         $entreeFraisAlreadyExists = false;
 
-//        dump($fiche->getEntreeFraisForfaits()->getValues());
+        //dump($fiche->getEntreeFraisForfaits()->getValues());
 
         $entreeFraisToEdit = null;
 
-        foreach ($fiche->getEntreeFraisForfaits()->getValues() as $entreeFrais) {
+        if ($request->request->get("type-frais") === "forfait")
+        {
+            foreach ($fiche->getEntreeFraisForfaits()->getValues() as $entreeFrais) {
 
-            if ($entreeFrais->getFraisForfait()->getId() == intval($request->request->get("frais-select"))) {
-                $entreeFraisAlreadyExists = true;
-                $entreeFraisToEdit = $entreeFrais;
-                break;
+                if ($entreeFrais->getFraisForfait()->getId() == intval($request->request->get("frais-select"))) {
+                    $entreeFraisAlreadyExists = true;
+                    $entreeFraisToEdit = $entreeFrais;
+                    break;
+                }
             }
         }
+        else if ($request->request->get("type-frais") === "horsforfait")
+        {
+//            dump($fiche->getEntreeFraisHorsForfaits()->getValues());
+//            die();
+            foreach ($fiche->getEntreeFraisHorsForfaits()->getValues() as $entreeFrais) {
 
-        dump("ici3");
-
+                if ($request->request->get("nom-frais") == $entreeFrais->getLibelle())
+                {
+                    $entreeFraisAlreadyExists = true;
+                    $entreeFraisToEdit = $entreeFrais;
+                }
+            }
+        }
 
         if ($request->request->get("type-frais") === "forfait" && !$entreeFraisAlreadyExists) {
             $newEntreeFrais = new EntreeFraisForfait();
@@ -181,28 +206,44 @@ class FicheController extends AbstractController
             $entityManager->persist($newEntreeFrais);
             $entityManager->flush();
         } else if ($request->request->get("type-frais") === "forfait" && $entreeFraisAlreadyExists) {
+            // si la nouvelle quantitée est égale à 0, annuler le frais
+            if($entreeFraisToEdit->getQuantity() + $request->request->get("quantite-frais") <= 0)
+            {
+                $entityManager->remove($entreeFraisToEdit);
+                $entityManager->flush();
+            } else {
+                $entreeFraisToEdit->setQuantity($entreeFraisToEdit->getQuantity() + $request->request->get("quantite-frais"));
+                $entityManager->persist($entreeFraisToEdit);
+                $entityManager->flush();
+            }
 
-            $entreeFraisToEdit->setQuantity($entreeFraisToEdit->getQuantity() + $request->request->get("quantite-frais"));
-            $entityManager->persist($entreeFraisToEdit);
-            $entityManager->flush();
-
-
-        } else if ($request->request->get("type-frais") === "horsforfait") {
+        } else if ($request->request->get("type-frais") === "horsforfait" && !$entreeFraisAlreadyExists) {
 
             // dump($request->request->get("nom-frais"));
 
             $newEntreeFraisHorsForfait = new EntreeFraisHorsForfait();
             $newEntreeFraisHorsForfait->setFicheFrais($fiche);
             $newEntreeFraisHorsForfait->setQuantity(intval($request->request->get("quantite-frais")));
-            $newEntreeFraisHorsForfait->setPrice(intval($request->request->get("prix-frais")));
+            $newEntreeFraisHorsForfait->setPrice(floatval($request->request->get("prix-frais")));
             $newEntreeFraisHorsForfait->setLibelle($request->request->get("nom-frais"));
 
             $entityManager->persist($newEntreeFraisHorsForfait);
             $entityManager->flush();
 
-        }
+        } else if ($request->request->get("type-frais") === "horsforfait" && $entreeFraisAlreadyExists) {
 
-        dump("ici4");
+            // si la nouvelle quantitée est égale à 0, annuler le frais
+            if ($entreeFraisToEdit->getQuantity() + $request->request->get("quantite-frais") <= 0)
+            {
+                $entityManager->remove($entreeFraisToEdit);
+                $entityManager->flush();
+            } else {
+                $entreeFraisToEdit->setPrice($entreeFraisToEdit->getPrice() + $request->request->get("prix-frais"));
+                $entreeFraisToEdit->setQuantity($entreeFraisToEdit->getQuantity() + $request->request->get("quantite-frais"));
+                $entityManager->persist($entreeFraisToEdit);
+                $entityManager->flush();
+            }
+        }
 
 
         return $this->redirectToRoute("fiche");
@@ -217,7 +258,6 @@ class FicheController extends AbstractController
      */
     public function getValidationPage(Request $request, UserRepository $userRepository, FicheFraisRepository $ficheFraisRepository)
     {
-        //TODO coder valdiation de fiche
 
         $ficheChoisie = null;
         $visiteurUsername = null;
@@ -225,11 +265,21 @@ class FicheController extends AbstractController
         $allFraisForfait = array();
         $allFraisHorsForfait = array();
 
-
+        /**
+         * SI les query parameters contiennent les infos sur la fiche, charger une page avec tableaux de fiche,
+         * SINON afficher un formulaire pour choisir les infos sur la fiche. (GERER DANS LA VUE fiche/valid.
+         */
         if ($request->query->get("moisChoice") && $request->query->get("anneeChoice") && $request->query->get("visiteur")) {
 
             $ficheChoisie = $ficheFraisRepository->findOneBy(["month" => $request->query->get("moisChoice"), "year" => $request->query->get("anneeChoice"), "idVisisteur" => $request->query->get("visiteur")]);
             $visiteurUsername = $userRepository->find($request->query->get("visiteur"))->getUsername();
+
+            /**
+             * SI l'utilisateur OU la fiche n'a pas été trouvée.
+             */
+            if ($ficheChoisie == null || $visiteurUsername == null) {
+                return $this->redirectToRoute("validation_page");
+            }
 
             $allFraisForfaitObj = $ficheChoisie->getEntreeFraisForfaits()->getValues();
 
@@ -252,6 +302,43 @@ class FicheController extends AbstractController
         $visiteurs = $userRepository->findByRole("ROLE_VIS");
 
         return $this->render("fiche/valid.html.twig", ["ficheChoisie" => $ficheChoisie, "visiteurUsername" => $visiteurUsername, "visiteurs" => $visiteurs, "fraisForfaits" => $allFraisForfait, "fraisHorsForfaits" => $allFraisHorsForfait]);
+    }
+
+    /**
+     * @Route("/changeetatfiche", name="change_etat_fiche")
+     * @IsGranted("ROLE_COMP")
+     */
+    public function changeEtatFiche(Request $request, FicheFraisRepository $ficheFraisRepository, EtatRepository $etatRepository)
+    {
+        $requestedId = $request->query->get("id");
+        $requestedEtat = $request->query->get("etat");
+
+        $entityManager = $this->getDoctrine()->getManager();
+
+        $requestedFiche = $ficheFraisRepository->find($requestedId);
+
+        if ($requestedFiche == null) {
+            $this->redirectToRoute("validation_page");
+        }
+
+        switch ($requestedEtat) {
+            case "rembourse":
+                //4
+                $requestedFiche->setIdEtat($etatRepository->find(4));
+                break;
+            case "valide":
+                //3
+                $requestedFiche->setIdEtat($etatRepository->find(3));
+                break;
+        }
+
+        $entityManager->flush();
+
+        return $this->redirectToRoute("validation_page", [
+            "moisChoice" => $requestedFiche->getMonth(),
+            "anneeChoice" => $requestedFiche->getYear(),
+            "visiteur" => $requestedFiche->getIdVisisteur()->getId()
+        ]);
     }
 
 }
