@@ -11,7 +11,7 @@
 
     {% include "layouts/pageindic.html.twig" with {'page_indic':'Validation de fiche'} %}
 
-    {#    CONTENU EN CAS DE FICHE NON CHOISIE#}
+    {# CONTENU EN CAS DE FICHE NON CHOISIE #}
     {% if ficheChoisie is not null %}
         <h2>Fiche du {{ ficheChoisie.month }}/{{ ficheChoisie.year }} de {{ visiteurUsername }}</h2>
 
@@ -67,18 +67,58 @@
             <br>
 
             {% if ficheChoisie.idEtat.id != 3 %}
-                <a href="{{ path('change_etat_fiche', { etat: 'valide', id: ficheChoisie.id }) }}"><button>Validée</button></a>
-            {% endif%}
+                <a href="{{ path('change_etat_fiche', { etat: 'valide', id: ficheChoisie.id }) }}">
+                    <button>Validée</button>
+                </a>
+            {% endif %}
 
             {% if ficheChoisie.idEtat.id != 4 %}
-                <a href="{{ path('change_etat_fiche', { etat: 'rembourse', id: ficheChoisie.id }) }}" style=""><button>Remboursée</button></a>
+                <a href="{{ path('change_etat_fiche', { etat: 'rembourse', id: ficheChoisie.id }) }}" style="">
+                    <button>Remboursée</button>
+                </a>
             {% endif %}
 
             <br>
+
         </div>
 
+        {# TODO rajouter la modification de la fiche pour le comptable #}
+        {# TODO reprendre ici 1.2 #}
+
+        <form class="addfrais-form" method="post" action="{{ path('addfrais_tospecific', { ficheid: ficheChoisie.id }) }}">
+            <h3>Nouveau frais</h3>
+
+            <input type="hidden" id="ficheid" name="ficheid" value="{{ ficheChoisie.id }}" />
+
+            <div>
+                <label for="type-frais">Type de frais</label>
+                <select name="type-frais" id="type-frais">
+                    <option value="forfait">Forfait</option>
+                    <option value="horsforfait">Hors forfait</option>
+                </select>
+            </div>
+
+{#            <div class="en-forfait">#}
+{#                <label for="frais-select">Frais forfait</label>#}
+{#                <select name="frais-select" id="frais-select">#}
+{#                    <option value="1">Etape</option>#}
+{#                    <option value="2">Kilométrique</option>#}
+{#                    <option value="3">Nuitée Hôtel</option>#}
+{#                    <option value="4">Repas Restaurant</option>#}
+{#                </select>#}
+{#            </div>#}
+
+{#            <input type="text" class="hors-forfait" id="nom-frais" name="nom-frais" placeholder="Libelle du frais">#}
+
+{#            <input type="text" class="hors-forfait" id="prix-frais" name="prix-frais" placeholder="Prix du frais">#}
+{#            <input type="text" id="quantite-frais" name="quantite-frais" placeholder="Quantité">#}
+
+            <button type="submit" class="addfrais-button">Ajouter</button>
+
+        </form>
+
     {% else %}
-        {#    CONTENU EN CAS DE FICHE CHOISIE#}
+        {# CONTENU EN CAS DE FICHE CHOISIE #}
         <form action="{{ path('validation_page') }}" method="get">
             <input type="number" name="moisChoice" placeholder="mois (ex: 11)"/>
             <input type="number" name="anneeChoice" placeholder="annee (ex: 2020)"/>

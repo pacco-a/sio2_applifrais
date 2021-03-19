@@ -107,6 +107,21 @@ class FicheController extends AbstractController
     }
 
     /**
+     * @Route("/addfraisspe", name="addfrais_tospecific", methods={"POST", "GET"})
+     * @IsGranted("ROLE_VIS")
+     */
+    public function addEntreeFraisSpe(Security $security, Request $request, FraisForfaitRepository $fraisForfaitRepository, FicheService $ficheService)
+    {
+        $fiche = $this->ficheFraisRepository->find(intval($request->request->get("ficheid")));
+
+        // TODO reprendre ici 1
+        dump($fiche);
+        die();
+//      aeazeaz
+    }
+
+
+    /**
      * @Route("/addfrais", name="addfrais", methods={"POST"})
      * @IsGranted("ROLE_VIS")
      */
