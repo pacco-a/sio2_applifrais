@@ -5,6 +5,7 @@
 
 {% block stylesheets %}
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="fiche.css">
 {% endblock %}
 
 {% block body %}
@@ -63,6 +64,21 @@
         </div>
 
         <div>
+        <button class="spoilertrigger-1">FAQ : Comment supprimer ou modifier un frais ?</button>
+        </div>
+        <div class="spoilercontent-1">
+            <h3>Supprimer ou modifier un frais :</h3>
+            <p>Pour modifier un frais (addition, soustraction ou suppression),
+                la manipulation est la même : utilisez le formulaire pour ajouter
+                la valeur de votre choix, pour soustraire la valeur passez une valeur
+                négative, pour supprimer un frais : passez une valeur négative dans le
+                champ quantité pour annuler le frais (0) </p>
+        </div>
+
+        <div id="popup-info">
+        </div>
+
+        <div>
 
             <br>
 
@@ -98,20 +114,20 @@
                 </select>
             </div>
 
-{#            <div class="en-forfait">#}
-{#                <label for="frais-select">Frais forfait</label>#}
-{#                <select name="frais-select" id="frais-select">#}
-{#                    <option value="1">Etape</option>#}
-{#                    <option value="2">Kilométrique</option>#}
-{#                    <option value="3">Nuitée Hôtel</option>#}
-{#                    <option value="4">Repas Restaurant</option>#}
-{#                </select>#}
-{#            </div>#}
+            <div class="en-forfait">
+                <label for="frais-select">Frais forfait</label>
+                <select name="frais-select" id="frais-select">
+                    <option value="1">Etape</option>
+                    <option value="2">Kilométrique</option>
+                    <option value="3">Nuitée Hôtel</option>
+                    <option value="4">Repas Restaurant</option>
+                </select>
+            </div>
 
-{#            <input type="text" class="hors-forfait" id="nom-frais" name="nom-frais" placeholder="Libelle du frais">#}
+            <input type="text" class="hors-forfait" id="nom-frais" name="nom-frais" placeholder="Libelle du frais">
 
-{#            <input type="text" class="hors-forfait" id="prix-frais" name="prix-frais" placeholder="Prix du frais">#}
-{#            <input type="text" id="quantite-frais" name="quantite-frais" placeholder="Quantité">#}
+            <input type="text" class="hors-forfait" id="prix-frais" name="prix-frais" placeholder="Prix du frais">
+            <input type="text" id="quantite-frais" name="quantite-frais" placeholder="Quantité">
 
             <button type="submit" class="addfrais-button">Ajouter</button>
 
@@ -131,4 +147,8 @@
         </form>
     {% endif %}
 
+{% endblock %}
+
+{% block javascripts %}
+    <script src="{{ asset('js/fiche.js') }}"></script>
 {% endblock %}

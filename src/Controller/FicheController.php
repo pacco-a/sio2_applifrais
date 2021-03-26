@@ -29,6 +29,8 @@ class FicheController extends AbstractController
     private $userRepository;
     private $ficheFraisRepository;
 
+
+
     public function __construct(UserRepository $userRepository, FicheFraisRepository $ficheFraisRepository)
     {
         $this->currentDate = new DateTime("now");
@@ -108,16 +110,138 @@ class FicheController extends AbstractController
 
     /**
      * @Route("/addfraisspe", name="addfrais_tospecific", methods={"POST", "GET"})
-     * @IsGranted("ROLE_VIS")
+     * @IsGranted("ROLE_COMP")
      */
     public function addEntreeFraisSpe(Security $security, Request $request, FraisForfaitRepository $fraisForfaitRepository, FicheService $ficheService)
     {
-        $fiche = $this->ficheFraisRepository->find(intval($request->request->get("ficheid")));
+
 
         // TODO reprendre ici 1
-        dump($fiche);
-        die();
-//      aeazeaz
+        // dump($request->request);
+        /**
+         * EXEMPLE
+         * [
+         *  "type-frais" => "forfait"
+         * "frais-select" => "1"
+         * "nom-frais" => ""
+         * "prix-frais" => ""
+         * "quantite-frais" => "15"
+         * ]
+         */
+
+        // VERIFIER SI LA FICHE EXISTE DEJA OU NON
+        $fiche = $this->ficheFraisRepository->find(intval($request->query->get("ficheid")));
+
+        /**
+         * SI la fiche n'existe pas rediriger vers la page "fiche"
+         * ce qui va créer automatiquement une fiche.
+         *
+         */
+
+        $entityManager = $this->getDoctrine()->getManager();
+
+        if (!$fiche) {
+            return $this->redirectToRoute("index");
+        }
+
+        // CREER L'ENTREE FRAIS
+
+        /**
+         * Si le frais existe déjà dans une certaine quantité,
+         * additionner celle ci à la place.
+         */
+
+        $entreeFraisAlreadyExists = false;
+
+        //dump($fiche->getEntreeFraisForfaits()->getValues());
+
+        $entreeFraisToEdit = null;
+
+        if ($request->request->get("type-frais") === "forfait")
+        {
+            foreach ($fiche->getEntreeFraisForfaits()->getValues() as $entreeFrais) {
+
+                if ($entreeFrais->getFraisForfait()->getId() == intval($request->request->get("frais-select"))) {
+                    $entreeFraisAlreadyExists = true;
+                    $entreeFraisToEdit = $entreeFrais;
+                    break;
+                }
+            }
+        }
+        else if ($request->request->get("type-frais") === "horsforfait")
+        {
+//            dump($fiche->getEntreeFraisHorsForfaits()->getValues());
+//            die();
+            foreach ($fiche->getEntreeFraisHorsForfaits()->getValues() as $entreeFrais) {
+
+                if ($request->request->get("nom-frais") == $entreeFrais->getLibelle())
+                {
+                    $entreeFraisAlreadyExists = true;
+                    $entreeFraisToEdit = $entreeFrais;
+                }
+            }
+        }
+
+        if ($request->request->get("type-frais") === "forfait" && !$entreeFraisAlreadyExists) {
+            $newEntreeFrais = new EntreeFraisForfait();
+
+            // set datas
+            $newEntreeFrais->setFicheFrais($fiche);
+            $newEntreeFrais->setQuantity($request->request->get("quantite-frais"));
+
+
+            $newEntreeFrais->setFraisForfait($fraisForfaitRepository->find(intval($request->request->get("frais-select"))));
+
+            dump($newEntreeFrais);
+
+            // -- -- validate & send
+            $entityManager->persist($newEntreeFrais);
+            $entityManager->flush();
+        } else if ($request->request->get("type-frais") === "forfait" && $entreeFraisAlreadyExists) {
+            // si la nouvelle quantitée est égale à 0, annuler le frais
+            if($entreeFraisToEdit->getQuantity() + $request->request->get("quantite-frais") <= 0)
+            {
+                $entityManager->remove($entreeFraisToEdit);
+                $entityManager->flush();
+            } else {
+                $entreeFraisToEdit->setQuantity($entreeFraisToEdit->getQuantity() + $request->request->get("quantite-frais"));
+                $entityManager->persist($entreeFraisToEdit);
+                $entityManager->flush();
+            }
+
+        } else if ($request->request->get("type-frais") === "horsforfait" && !$entreeFraisAlreadyExists) {
+
+            // dump($request->request->get("nom-frais"));
+
+            $newEntreeFraisHorsForfait = new EntreeFraisHorsForfait();
+            $newEntreeFraisHorsForfait->setFicheFrais($fiche);
+            $newEntreeFraisHorsForfait->setQuantity(intval($request->request->get("quantite-frais")));
+            $newEntreeFraisHorsForfait->setPrice(floatval($request->request->get("prix-frais")));
+            $newEntreeFraisHorsForfait->setLibelle($request->request->get("nom-frais"));
+
+            $entityManager->persist($newEntreeFraisHorsForfait);
+            $entityManager->flush();
+
+        } else if ($request->request->get("type-frais") === "horsforfait" && $entreeFraisAlreadyExists) {
+
+            // si la nouvelle quantitée est égale à 0, annuler le frais
+            if ($entreeFraisToEdit->getQuantity() + $request->request->get("quantite-frais") <= 0)
+            {
+                $entityManager->remove($entreeFraisToEdit);
+                $entityManager->flush();
+            } else {
+                $entreeFraisToEdit->setPrice($entreeFraisToEdit->getPrice() + $request->request->get("prix-frais"));
+                $entreeFraisToEdit->setQuantity($entreeFraisToEdit->getQuantity() + $request->request->get("quantite-frais"));
+                $entityManager->persist($entreeFraisToEdit);
+                $entityManager->flush();
+            }
+        }
+
+        return $this->redirectToRoute("validation_page", [
+            "moisChoice" => $fiche->getMonth(),
+            "anneeChoice" => $fiche->getYear(),
+            "visiteur" => $fiche->getIdVisisteur()->getId()
+        ]);
     }
 
 
@@ -150,12 +274,6 @@ class FicheController extends AbstractController
          *
          * OU si la fiche n'est pas écrivable, renvoyer vers la
          * page fiche également. :-) (juste par sécurité)
-         */
-
-        /**
-         * TODO faire la suppression de frais dans la fiche
-         *  et s'assurer que la fiche est éditable
-         *  ce moment la merci.
          */
 
         $entityManager = $this->getDoctrine()->getManager();
