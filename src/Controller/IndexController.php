@@ -12,12 +12,10 @@ class IndexController extends AbstractController
 {
     /**
      * @Route("/", name="index")
-     * @Security("is_granted('ROLE_VIS') or is_granted('ROLE_COMP')")
+     * @Security("is_granted('ROLE_VIS') or is_granted('ROLE_COMP') or is_granted('ROLE_VAL')")
      */
     public function index(SessionService $sessionService)
     {
-
-
         return $this->render('index/index.html.twig', [
         ]);
     }

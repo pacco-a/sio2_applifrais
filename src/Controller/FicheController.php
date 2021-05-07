@@ -457,7 +457,11 @@ class FicheController extends AbstractController
         switch ($requestedEtat) {
             case "rembourse":
                 //4
-                $requestedFiche->setIdEtat($etatRepository->find(4));
+                // (EPREUVE E4) vérifier que l'utilisateur est bien un validateur
+                if (in_array( "ROLE_VAL" , $this->getUser()->getRoles()))
+                {
+                    $requestedFiche->setIdEtat($etatRepository->find(4));
+                }
                 break;
             case "valide":
                 //3
