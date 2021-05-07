@@ -27,10 +27,12 @@
                 en cours de paiement</h3>
         {% elseif ficheChoisie.idEtat.id == 4 %}
             <h3 style="background-color: green; border-radius: 25%; padding: 5px 0px; text-align: center">
-                Remboursée.</h3>
+                {# EPREUVE E4 affichage du validateur #}
+                Remboursée. ( {{ ficheChoisie.validateur.username }} ) </h3>
         {% endif %}
 
         <h3>frais forfaits</h3>
+
         <div>
             <table style="width:100%">
                 <tr>
@@ -82,13 +84,14 @@
 
             <br>
 
-            {% if ficheChoisie.idEtat.id != 3 %}
+            {% if ficheChoisie.idEtat.id < 3 %}
                 <a href="{{ path('change_etat_fiche', { etat: 'valide', id: ficheChoisie.id }) }}">
                     <button>Validée</button>
                 </a>
             {% endif %}
 
-            {% if ficheChoisie.idEtat.id != 4 %}
+            {# EPREUVE E4 modification de la vue pour afficher le bouton que si la fiche est validée ET que l'utilisateur est validateur #}
+            {% if ficheChoisie.idEtat.id == 3 and is_granted("ROLE_VAL") %}
                 <a href="{{ path('change_etat_fiche', { etat: 'rembourse', id: ficheChoisie.id }) }}" style="">
                     <button>Remboursée</button>
                 </a>

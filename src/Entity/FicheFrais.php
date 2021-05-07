@@ -66,6 +66,12 @@ class FicheFrais
      */
     private $year;
 
+    /**
+     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="ficheFraisValidee")
+     */
+    // EPREUVE E4 : ajout du champ validateur
+    private $validateur;
+
     public function __construct()
     {
         $this->entreeFraisForfaits = new ArrayCollection();
@@ -219,6 +225,18 @@ class FicheFrais
     public function setYear(int $year): self
     {
         $this->year = $year;
+
+        return $this;
+    }
+
+    public function getValidateur(): ?User
+    {
+        return $this->validateur;
+    }
+
+    public function setValidateur(?User $validateur): self
+    {
+        $this->validateur = $validateur;
 
         return $this;
     }

@@ -66,9 +66,15 @@ class User implements UserInterface
      */
     private $ficheFrais;
 
+    /**
+     * @ORM\OneToMany(targetEntity=FicheFrais::class, mappedBy="validateur")
+     */
+    private $ficheFraisValidee;
+
     public function __construct()
     {
         $this->ficheFrais = new ArrayCollection();
+        $this->ficheFraisValidee = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -221,6 +227,37 @@ class User implements UserInterface
             // set the owning side to null (unless already changed)
             if ($ficheFrai->getIdVisisteur() === $this) {
                 $ficheFrai->setIdVisisteur(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|FicheFrais[]
+     */
+    public function getFicheFraisValidee(): Collection
+    {
+        return $this->ficheFraisValidee;
+    }
+
+    public function addFicheFraisValidee(FicheFrais $ficheFraisValidee): self
+    {
+        if (!$this->ficheFraisValidee->contains($ficheFraisValidee)) {
+            $this->ficheFraisValidee[] = $ficheFraisValidee;
+            $ficheFraisValidee->setValidateur($this);
+        }
+
+        return $this;
+    }
+
+    public function removeFicheFraisValidee(FicheFrais $ficheFraisValidee): self
+    {
+        if ($this->ficheFraisValidee->contains($ficheFraisValidee)) {
+            $this->ficheFraisValidee->removeElement($ficheFraisValidee);
+            // set the owning side to null (unless already changed)
+            if ($ficheFraisValidee->getValidateur() === $this) {
+                $ficheFraisValidee->setValidateur(null);
             }
         }
 

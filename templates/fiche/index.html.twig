@@ -26,7 +26,8 @@
                 en cours de paiement</h3>
         {% elseif fiche.idEtat.id == 4%}
             <h3 style="background-color: green; border-radius: 25%; padding: 5px 0px; text-align: center">
-                Remboursée.</h3>
+                {# EPREUVE E4 affichage du validateur #}
+                Remboursée. ( {{ fiche.validateur.username }} )</h3>
         {% endif %}
 
         <h3>frais forfaits</h3>
